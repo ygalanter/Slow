@@ -1,0 +1,21 @@
+{
+  "fitbit": {
+    "appUUID": "4bd15574-f97f-4cf0-ba43-da29b10c05df",
+    "appType": "clockface",
+    "appDisplayName": "Slow",
+    "iconFile": "resources/icon.png",
+    "wipeColor": "#607d8b",
+    "requestedPermissions": [
+      "access_activity"
+    ],
+    "buildTargets": [
+      "meson",
+      "higgs"
+    ],
+    "i18n": {
+      "en": {
+        "name": "Slow"
+      }
+    }
+  }
+}
