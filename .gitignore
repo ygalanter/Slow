@@ -1,0 +1,4 @@
+node_modules
+yarn.lock
+fitbit-sdk-build-targets-v1.2.1-gemini.tgz
+*.fba

@@ -1,14 +1,11 @@
 // importing libraries
 import clock from "clock";
 import document from "document";
-import { preferences } from "user-settings";
 import { battery } from "power";
-import { me as device } from "device";
-import * as messaging from "messaging";
-import * as fs from "fs";
-import { me } from "appbit";
-import { goals, today } from "user-activity";
+import { today } from "user-activity";
 import { units } from "user-settings";
+import { preferences } from "fitbit-preferences";
+import asap from "fitbit-asap/app";
 import dtlib from "../common/datetimelib"
 
 
@@ -25,48 +22,29 @@ function precisionRound(number, precision) {
 }
 
 
-// on app exit collect settings 
-me.onunload = () => {
-  fs.writeFileSync("user_settings.json", userSettings, "json");
-}
-
-
 // Message is received
-messaging.peerSocket.onmessage = evt => {
+asap.onmessage = data => {
   
-  switch (evt.data.key) {
+  switch (data.key) {
      case "digital":
-          userSettings[evt.data.key] = JSON.parse(evt.data.newValue).values[0].value;
-          setActivityIcon(userSettings[evt.data.key]);
-          updateActivity(userSettings[evt.data.key]);
+          let activity = JSON.parse(data.newValue).values[0].value;
+
+          if (activity === "elevationGain" && today.adjusted["elevationGain"] === undefined) {
+            break;
+          }
+
+          preferences[data.key] = activity;
+          setActivityIcon(preferences[data.key]);
+          updateActivity(preferences[data.key]);
           break;
   };
 }
 
-// Message socket opens
-messaging.peerSocket.onopen = () => {
-  console.log("App Socket Open");
-};
-
-// Message socket closes
-messaging.peerSocket.close = () => {
-  console.log("App Socket Closed");
-};
-
 
 
 // trying to get user settings if saved before
-let userSettings;
-try {
-  userSettings = fs.readFileSync("user_settings.json", "json");
-} catch (e) {
-  userSettings = {digital: "time"}
-}
-
-
-//trap
-if (!userSettings.digital) {
-  userSettings = {digital: "time"}
+if  (!preferences.digital) {
+  preferences.digital = "time";
 }
 
 function setActivityIcon(activity) {
@@ -74,8 +52,6 @@ function setActivityIcon(activity) {
 }
 
 function updateActivity(activity) {
-  
- 
   
     switch (activity) {
       case "battery":
@@ -85,10 +61,10 @@ function updateActivity(activity) {
         digital.text = `${dtlib.zeroPad(hours)}:${dtlib.zeroPad(mins)}`;
         break;
       case "distance":
-        digital.text = units.distance == 'us'? precisionRound(today.local[activity]/1000/1.609344, 1) + 'mi' : precisionRound(today.local[activity]/1000, 1) + 'km'
+        digital.text = units.distance == 'us'? precisionRound(today.adjusted[activity]/1000/1.609344, 1) + 'mi' : precisionRound(today.adjusted[activity]/1000, 1) + 'km'
         break;
       default:
-        digital.text = today.local[activity];
+        digital.text = today.adjusted[activity];
         break;
     }
 
@@ -100,21 +76,21 @@ function updateActivity(activity) {
 // Update the clock every minute
 clock.granularity = "minutes";
 
-setActivityIcon(userSettings.digital);
+setActivityIcon(preferences.digital);
 
 // Update the <text> element every tick with the current time
 clock.ontick = (evt) => {
-  let today = evt.date;
+  let todayDate = evt.date;
   
-  hours = today.getHours()
-  mins =  today.getMinutes();
+  hours = todayDate.getHours()
+  mins =  todayDate.getMinutes();
 
   
   let angle = (hours*60 + mins)*360/(24*60)
 
   hand.groupTransform.rotate.angle = 180 + angle;
   
-  updateActivity(userSettings.digital);
+  updateActivity(preferences.digital);
   
 }
 

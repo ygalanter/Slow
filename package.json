@@ -9,13 +9,26 @@
       "access_activity"
     ],
     "buildTargets": [
+      "higgs",
       "meson",
-      "higgs"
+      "gemini"
     ],
     "i18n": {
       "en": {
         "name": "Slow"
       }
     }
+  },
+  "devDependencies": {
+    "@fitbit/sdk": "~3.1.0-pre.3",
+    "@fitbit/sdk-build-targets": "file:./fitbit-sdk-build-targets-v1.2.1-gemini.tgz",
+    "@fitbit/sdk-cli": "~1.5.0"
+  },
+  "scripts": {
+    "build": "fitbit-build"
+  },
+  "dependencies": {
+    "fitbit-asap": "^1.0.5",
+    "fitbit-preferences": "^1.0.0"
   }
 }
